@@ -5,7 +5,6 @@ after providing the drug name and zipcode.
 
 """
 
-from typing import Union
 from urllib.error import HTTPError
 
 from bs4 import BeautifulSoup
@@ -14,7 +13,7 @@ from requests import exceptions, get
 BASE_URL = "https://www.wellrx.com/prescriptions/{0}/{1}/?freshSearch=true"
 
 
-def fetch_pharmacy_and_price_list(drug_name: str, zip_code: str) -> Union[list, None]:
+def fetch_pharmacy_and_price_list(drug_name: str, zip_code: str) -> list | None:
     """[summary]
 
     This function will take input of drug name and zipcode,
@@ -38,13 +37,12 @@ def fetch_pharmacy_and_price_list(drug_name: str, zip_code: str) -> Union[list, 
     """
 
     try:
-
         # Has user provided both inputs?
         if not drug_name or not zip_code:
             return None
 
         request_url = BASE_URL.format(drug_name, zip_code)
-        response = get(request_url)
+        response = get(request_url, timeout=10)
 
         # Is the response ok?
         response.raise_for_status()
@@ -59,7 +57,6 @@ def fetch_pharmacy_and_price_list(drug_name: str, zip_code: str) -> Union[list, 
         grid_list = soup.find_all("div", {"class": "grid-x pharmCard"})
         if grid_list and len(grid_list) > 0:
             for grid in grid_list:
-
                 # Get the pharmacy price.
                 pharmacy_name = grid.find("p", {"class": "list-title"}).text
 
@@ -80,20 +77,17 @@ def fetch_pharmacy_and_price_list(drug_name: str, zip_code: str) -> Union[list, 
 
 
 if __name__ == "__main__":
-
     # Enter a drug name and a zip code
     drug_name = input("Enter drug name: ").strip()
     zip_code = input("Enter zip code: ").strip()
 
-    pharmacy_price_list: Union[list, None] = fetch_pharmacy_and_price_list(
+    pharmacy_price_list: list | None = fetch_pharmacy_and_price_list(
         drug_name, zip_code
     )
 
     if pharmacy_price_list:
-
         print(f"\nSearch results for {drug_name} at location {zip_code}:")
         for pharmacy_price in pharmacy_price_list:
-
             name = pharmacy_price["pharmacy_name"]
             price = pharmacy_price["price"]
 
